@@ -1,7 +1,9 @@
-const { createServer } = require("http");
-const { Server } = require("socket.io");
+const express = require('express');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 
-const httpServer = createServer();
+const app = express();
+const httpServer = createServer(app);
 const io = new Server(httpServer, { 
     cors: {
         origin: "*",
@@ -11,13 +13,17 @@ const io = new Server(httpServer, {
 let players = {};
 const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white'];
 
+// Serve static files (your PhaserJS game)
+app.use(express.static('public'));
+
 io.on('connection', (socket) => {
     console.log('A player connected: ', socket.id);
 
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
     players[socket.id] = { 
-        pos: [250, 250], angle: 0, velocity: 0, color: randomColor};
+        pos: [250, 250], angle: 0, velocity: 0, color: randomColor
+    };
 
     // Send the current players' state to the new player
     socket.emit('init', players);
@@ -40,6 +46,7 @@ io.on('connection', (socket) => {
     });
 });
 
+// Set the port (Render will set process.env.PORT automatically)
 const port = process.env.PORT || 3000;
 
 httpServer.listen(port, () => {
