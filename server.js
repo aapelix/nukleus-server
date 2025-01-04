@@ -11,8 +11,6 @@ const io = new Server(httpServer, {
 let players = {};
 const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white'];
 
-
-
 io.on('connection', (socket) => {
     console.log('A player connected: ', socket.id);
 
@@ -42,4 +40,8 @@ io.on('connection', (socket) => {
     });
 });
 
-httpServer.listen(3000);
+const port = process.env.PORT || 3000;
+
+httpServer.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
