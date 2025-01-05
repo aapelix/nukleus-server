@@ -1,12 +1,15 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const dotenv = require("dotenv")
+dotenv.config()
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { 
     cors: {
         origin: "*",
+        methods: ["GET", "POST"]
     }
 });
 
@@ -33,7 +36,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('collision', (collisionData) => {
-        // Broadcast collision to all players
         io.emit('collision', collisionData);
     });
 
@@ -48,8 +50,8 @@ io.on('connection', (socket) => {
     });
 });
 
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 
-httpServer.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+httpServer.listen(PORT, () => {
+    console.log(`Server running on PORT ${PORT}`);
 });
