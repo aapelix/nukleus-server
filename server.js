@@ -13,40 +13,41 @@ const io = new Server(httpServer, {
 let players = {};
 const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white'];
 
-// Serve static files (your PhaserJS game)
-app.use(express.static('public'));
-
 io.on('connection', (socket) => {
     console.log('A player connected: ', socket.id);
 
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
     players[socket.id] = { 
-        pos: [250, 250], angle: 0, velocity: 0, color: randomColor
+        pos: [250, 250], angle: 0, velocity: 0, color: randomColor, vehicle: Math.random() < 0.1 ? "tank" : "car", turretAngle: 0 
     };
 
-    // Send the current players' state to the new player
     socket.emit('init', players);
 
-    // Listen for movement updates from this player
     socket.on('move', (data) => {
         if (players[socket.id]) {
             players[socket.id] = { ...players[socket.id], ...data };
         }
 
-        // Broadcast updated player data to all clients
         io.emit('update', players);
     });
 
-    // Handle player disconnect
+    socket.on('collision', (collisionData) => {
+        // Broadcast collision to all players
+        io.emit('collision', collisionData);
+    });
+
+
     socket.on('disconnect', () => {
         console.log('A player disconnected: ', socket.id);
         delete players[socket.id];
-        io.emit('update', players); // Broadcast updated player list
+
+        io.emit("player-disconnect", socket.id)
+
+        io.emit('update', players);
     });
 });
 
-// Set the port (Render will set process.env.PORT automatically)
 const port = process.env.PORT || 3000;
 
 httpServer.listen(port, () => {
